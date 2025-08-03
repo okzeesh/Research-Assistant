@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.0
+    container_name: research-assistant-elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+      - elasticsearch_data:/usr/share/elasticsearch/data
+    networks:
+      - research-network
+
+  research-assistant:
+    build: .
+    container_name: research-assistant-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ELASTICSEARCH_URL=http://elasticsearch:9200
+      - ELASTICSEARCH_INDEX=research_papers
+      - OLLAMA_BASE_URL=http://host.docker.internal:11434
+      - OLLAMA_MODEL=llama2
+      - UPLOAD_DIR=uploads
+      - MAX_FILE_SIZE=52428800
+      - CHUNK_SIZE=1000
+      - CHUNK_OVERLAP=200
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+      - elasticsearch
+    networks:
+      - research-network
+    restart: unless-stopped
+
+volumes:
+  elasticsearch_data:
+
+networks:
+  research-network:
+    driver: bridge
