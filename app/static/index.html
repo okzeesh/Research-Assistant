@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Research Assistant</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 30px;
+        text-align: center;
+      }
+
+      .header h1 {
+        font-size: 2.5em;
+        margin-bottom: 10px;
+      }
+
+      .header p {
+        font-size: 1.1em;
+        opacity: 0.9;
+      }
+
+      .content {
+        padding: 30px;
+      }
+
+      .section {
+        margin-bottom: 40px;
+        padding: 25px;
+        border: 1px solid #e1e5e9;
+        border-radius: 10px;
+        background: #f8f9fa;
+      }
+
+      .section h2 {
+        color: #333;
+        margin-bottom: 20px;
+        font-size: 1.5em;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #555;
+      }
+
+      .form-group input,
+      .form-group textarea,
+      .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e1e5e9;
+        border-radius: 8px;
+        font-size: 16px;
+        transition: border-color 0.3s;
+      }
+
+      .form-group input:focus,
+      .form-group textarea:focus,
+      .form-group select:focus {
+        outline: none;
+        border-color: #667eea;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 8px;
+        font-size: 16px;
+        cursor: pointer;
+        transition: transform 0.2s;
+      }
+
+      .btn:hover {
+        transform: translateY(-2px);
+      }
+
+      .btn:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+        transform: none;
+      }
+
+      .result {
+        margin-top: 20px;
+        padding: 20px;
+        background: white;
+        border-radius: 8px;
+        border-left: 4px solid #667eea;
+      }
+
+      .result h3 {
+        color: #333;
+        margin-bottom: 15px;
+      }
+
+      .result pre {
+        background: #f8f9fa;
+        padding: 15px;
+        border-radius: 5px;
+        overflow-x: auto;
+        white-space: pre-wrap;
+      }
+
+      .loading {
+        text-align: center;
+        padding: 20px;
+        color: #666;
+      }
+
+      .spinner {
+        border: 3px solid #f3f3f3;
+        border-top: 3px solid #667eea;
+        border-radius: 50%;
+        width: 30px;
+        height: 30px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 10px;
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      .file-list {
+        margin-top: 20px;
+      }
+
+      .file-item {
+        background: white;
+        padding: 15px;
+        margin-bottom: 10px;
+        border-radius: 8px;
+        border: 1px solid #e1e5e9;
+      }
+
+      .file-item h4 {
+        color: #333;
+        margin-bottom: 5px;
+      }
+
+      .file-item p {
+        color: #666;
+        font-size: 0.9em;
+      }
+
+      .tabs {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e1e5e9;
+      }
+
+      .tab {
+        padding: 15px 25px;
+        cursor: pointer;
+        border-bottom: 3px solid transparent;
+        transition: all 0.3s;
+      }
+
+      .tab.active {
+        border-bottom-color: #667eea;
+        color: #667eea;
+        font-weight: 600;
+      }
+
+      .tab-content {
+        display: none;
+      }
+
+      .tab-content.active {
+        display: block;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>🔬 Research Assistant</h1>
+        <p>AI-powered academic paper analysis and Q&A</p>
+      </div>
+
+      <div class="content">
+        <div class="tabs">
+          <div class="tab active" onclick="showTab('upload')">
+            📄 Upload Paper
+          </div>
+          <div class="tab" onclick="showTab('summary')">
+            📝 Generate Summary
+          </div>
+          <div class="tab" onclick="showTab('query')">❓ Ask Questions</div>
+          <div class="tab" onclick="showTab('related')">
+            🔍 Find Related Papers
+          </div>
+          <div class="tab" onclick="showTab('files')">📁 Manage Files</div>
+        </div>
+
+        <!-- Upload Paper Tab -->
+        <div id="upload" class="tab-content active">
+          <div class="section">
+            <h2>Upload Academic Paper</h2>
+            <form id="uploadForm">
+              <div class="form-group">
+                <label for="file">Select PDF File:</label>
+                <input
+                  type="file"
+                  id="file"
+                  name="file"
+                  accept=".pdf"
+                  required
+                />
+              </div>
+              <button type="submit" class="btn">Upload & Process</button>
+            </form>
+            <div id="uploadResult"></div>
+          </div>
+        </div>
+
+        <!-- Generate Summary Tab -->
+        <div id="summary" class="tab-content">
+          <div class="section">
+            <h2>Generate Paper Summary</h2>
+            <form id="summaryForm">
+              <div class="form-group">
+                <label for="summaryFileId">File ID:</label>
+                <input
+                  type="text"
+                  id="summaryFileId"
+                  placeholder="Enter file ID from upload"
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="summaryType">Summary Type:</label>
+                <select id="summaryType">
+                  <option value="general">General Summary</option>
+                  <option value="detailed">Detailed Summary</option>
+                  <option value="key_points">Key Points</option>
+                </select>
+              </div>
+              <button type="submit" class="btn">Generate Summary</button>
+            </form>
+            <div id="summaryResult"></div>
+          </div>
+        </div>
+
+        <!-- Ask Questions Tab -->
+        <div id="query" class="tab-content">
+          <div class="section">
+            <h2>Ask Questions About Papers</h2>
+            <form id="queryForm">
+              <div class="form-group">
+                <label for="queryText">Your Question:</label>
+                <textarea
+                  id="queryText"
+                  rows="4"
+                  placeholder="Ask any question about the papers..."
+                  required
+                ></textarea>
+              </div>
+              <div class="form-group">
+                <label for="queryFileId">File ID (optional):</label>
+                <input
+                  type="text"
+                  id="queryFileId"
+                  placeholder="Leave empty to search all papers"
+                />
+              </div>
+              <button type="submit" class="btn">Ask Question</button>
+            </form>
+            <div id="queryResult"></div>
+          </div>
+        </div>
+
+        <!-- Find Related Papers Tab -->
+        <div id="related" class="tab-content">
+          <div class="section">
+            <h2>Find Related Papers</h2>
+            <form id="relatedForm">
+              <div class="form-group">
+                <label for="relatedQuery">Search Query:</label>
+                <input
+                  type="text"
+                  id="relatedQuery"
+                  placeholder="Enter your search terms..."
+                  required
+                />
+              </div>
+              <div class="form-group">
+                <label for="relatedLimit">Number of Results:</label>
+                <input
+                  type="number"
+                  id="relatedLimit"
+                  value="10"
+                  min="1"
+                  max="50"
+                />
+              </div>
+              <button type="submit" class="btn">Find Related Papers</button>
+            </form>
+            <div id="relatedResult"></div>
+          </div>
+        </div>
+
+        <!-- Manage Files Tab -->
+        <div id="files" class="tab-content">
+          <div class="section">
+            <h2>Uploaded Files</h2>
+            <button onclick="loadFiles()" class="btn">Refresh Files</button>
+            <div id="filesList" class="file-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const API_BASE = "http://localhost:8000";
+
+      function showTab(tabName) {
+        // Hide all tabs
+        document.querySelectorAll(".tab-content").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+        document.querySelectorAll(".tab").forEach((tab) => {
+          tab.classList.remove("active");
+        });
+
+        // Show selected tab
+        document.getElementById(tabName).classList.add("active");
+        event.target.classList.add("active");
+      }
+
+      function showLoading(elementId) {
+        document.getElementById(elementId).innerHTML = `
+                <div class="loading">
+                    <div class="spinner"></div>
+                    <p>Processing...</p>
+                </div>
+            `;
+      }
+
+      function showResult(elementId, title, content) {
+        document.getElementById(elementId).innerHTML = `
+                <div class="result">
+                    <h3>${title}</h3>
+                    <pre>${content}</pre>
+                </div>
+            `;
+      }
+
+      function showError(elementId, error) {
+        document.getElementById(elementId).innerHTML = `
+                <div class="result">
+                    <h3>Error</h3>
+                    <pre style="color: red;">${error}</pre>
+                </div>
+            `;
+      }
+
+      // Upload Paper
+      document
+        .getElementById("uploadForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const formData = new FormData();
+          const fileInput = document.getElementById("file");
+          formData.append("file", fileInput.files[0]);
+
+          showLoading("uploadResult");
+
+          try {
+            const response = await fetch(`${API_BASE}/upload`, {
+              method: "POST",
+              body: formData,
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              showResult(
+                "uploadResult",
+                "Upload Successful",
+                `File ID: ${result.file_id}\nFilename: ${result.filename}\nSize: ${result.file_size} bytes\nStatus: ${result.processing_status}`
+              );
+            } else {
+              showError("uploadResult", result.detail || "Upload failed");
+            }
+          } catch (error) {
+            showError("uploadResult", `Error: ${error.message}`);
+          }
+        });
+
+      // Generate Summary
+      document
+        .getElementById("summaryForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const fileId = document.getElementById("summaryFileId").value;
+          const summaryType = document.getElementById("summaryType").value;
+
+          showLoading("summaryResult");
+
+          try {
+            const response = await fetch(`${API_BASE}/summary`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                file_id: fileId,
+                summary_type: summaryType,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              showResult(
+                "summaryResult",
+                "Summary Generated",
+                `Title: ${result.title}\nAuthors: ${result.authors.join(
+                  ", "
+                )}\n\nSummary:\n${result.summary}`
+              );
+            } else {
+              showError(
+                "summaryResult",
+                result.detail || "Summary generation failed"
+              );
+            }
+          } catch (error) {
+            showError("summaryResult", `Error: ${error.message}`);
+          }
+        });
+
+      // Ask Questions
+      document
+        .getElementById("queryForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const query = document.getElementById("queryText").value;
+          const fileId = document.getElementById("queryFileId").value;
+
+          showLoading("queryResult");
+
+          try {
+            const response = await fetch(`${API_BASE}/query`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query: query,
+                file_id: fileId || null,
+              }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              showResult("queryResult", "Answer", result.answer);
+            } else {
+              showError("queryResult", result.detail || "Query failed");
+            }
+          } catch (error) {
+            showError("queryResult", `Error: ${error.message}`);
+          }
+        });
+
+      // Find Related Papers
+      document
+        .getElementById("relatedForm")
+        .addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const query = document.getElementById("relatedQuery").value;
+          const limit = document.getElementById("relatedLimit").value;
+
+          showLoading("relatedResult");
+
+          try {
+            const response = await fetch(`${API_BASE}/related`, {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                query: query,
+                limit: parseInt(limit),
+              }),
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
+              let content = `Found ${result.total_found} related papers:\n\n`;
+              result.papers.forEach((paper, index) => {
+                content += `${index + 1}. ${paper.title}\n`;
+                content += `   Authors: ${paper.authors.join(", ")}\n`;
+                content += `   Relevance Score: ${paper.relevance_score}\n`;
+                content += `   Preview: ${paper.content_preview}\n\n`;
+              });
+              showResult("relatedResult", "Related Papers", content);
+            } else {
+              showError("relatedResult", result.detail || "Search failed");
+            }
+          } catch (error) {
+            showError("relatedResult", `Error: ${error.message}`);
+          }
+        });
+
+      // Load Files
+      async function loadFiles() {
+        showLoading("filesList");
+
+        try {
+          const response = await fetch(`${API_BASE}/files`);
+          const result = await response.json();
+
+          if (response.ok) {
+            let content = "";
+            if (result.files.length === 0) {
+              content = "No files uploaded yet.";
+            } else {
+              result.files.forEach((file) => {
+                content += `
+                                <div class="file-item">
+                                    <h4>${file.filename}</h4>
+                                    <p>File ID: ${file.file_id}</p>
+                                    <p>Size: ${file.file_size} bytes</p>
+                                    <p>Status: ${file.processing_status}</p>
+                                    <p>Uploaded: ${new Date(
+                                      file.uploaded_at
+                                    ).toLocaleString()}</p>
+                                </div>
+                            `;
+              });
+            }
+            document.getElementById("filesList").innerHTML = content;
+          } else {
+            showError("filesList", result.detail || "Failed to load files");
+          }
+        } catch (error) {
+          showError("filesList", `Error: ${error.message}`);
+        }
+      }
+
+      // Load files on page load
+      window.addEventListener("load", loadFiles);
+    </script>
+  </body>
+</html>
